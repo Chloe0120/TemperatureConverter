@@ -10,7 +10,7 @@ class Converter:
         background_color = "light blue"
 
         # Converter Frame
-        self.converter_frame = Frame(width=300, bg=background_color,
+        self.converter_frame = Frame(width=350, bg=background_color,
                                      pady=10)
         self.converter_frame.grid()
 
@@ -42,12 +42,14 @@ class Converter:
 
         self.to_c_button = Button(self.conversion_buttons_frame,
                                   text="To Centigrade", font="Arial 10 bold",
-                                  bg="Khaki1", padx=10, pady=10)
+                                  bg="Khaki1", padx=10, pady=10,
+                                  command=lambda: self.temp_convert(-459))
         self.to_c_button.grid(row=0, column=0)
 
         self.to_f_button = Button(self.conversion_buttons_frame,
                                   text="To Fahrenheit", font="Arial 10 bold",
-                                  bg="Orchid1", padx=10, pady=10)
+                                  bg="Orchid1", padx=10, pady=10,
+                                  command=lambda: self.temp_convert(-273))
         self.to_f_button.grid(row=0, column=1)
 
         # Answer label (row 4)
@@ -67,14 +69,60 @@ class Converter:
         self.help_button = Button(self.hist_help_frame, font="Arial 12 bold",
                                   text="Help", width=5)
         self.help_button.grid(row=0, column=1)
-        
 
+    def temp_convert(self, low):
+        print(low)
 
+        error = "#ffafaf"   # Pale pink background for when entry box has errors
 
+        # Retrieve amount entered into Entry field
+        to_convert = self.to_convert_entry.get()
 
+        try:
+            to_convert = float(to_convert)
+            has_errors = "no"
 
+            # Check and convert to Fahrenheit
+            if low == -273 and to_convert >= low:
+                fahrenheit = (to_convert * 9/5) + 32
+                to_convert = self.round_it(to_convert)
+                fahrenheit = self.round_it(fahrenheit)
+                answer = "{} degrees C is {} degrees F".format(to_convert, fahrenheit)
 
+            # Check and convert to Centigrade
+            elif low == -459 and to_convert >= low:
+                centigrade = (to_convert - 32) * 5/9
+                to_convert = self.round_it(to_convert)
+                centigrade = self.round_it(centigrade)
+                answer = "{} degrees C is {} degrees F".format(to_convert, centigrade)
 
+            else:
+                # Input is invalid (too cold)
+                answer = "Too Cold!"
+                has_errors = "yes"
+
+            # Display answer
+            if has_errors == "no":
+                self.converted_label.configure(text=answer, fg="blue")
+                self.to_convert_entry.configure(bg="white")
+            else:
+                self.converted_label.configure(text=answer, fg="red")
+                self.to_convert_entry.configure(bg=error)
+            # Add Answer to list for History
+
+        except ValueError:
+            self.converted_label.configure(text="Enter a number!!", fg="red")
+            self.to_convert_entry.configure(bg=error)
+
+    def round_it(self, to_round):
+        if to_round % 1 == 0:
+            rounded = int(to_round)
+        else:
+            rounded = round(to_round, 1)
+
+        return rounded
+
+# main routine
 if __name__ == "__main__":
     root = Tk()
     root.title("Temperature Converter")
