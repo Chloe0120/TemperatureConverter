@@ -1,20 +1,26 @@
 from tkinter import *
 from functools import partial   # To prevent unwanted windows
 
+
 import random
 
 
 class Converter:
-    def __init__(self, parent):
+    def __init__(self):
 
         # Formatting variables
         background_color = "light blue"
 
         # In actual program this is blank and is populated with user calculations
-        self.all_calc_list = ['0 degrees C is -17.8 degrees F',
+
+        '''self.all_calc_list = ['0 degrees C is -17.8 degrees F',
                               '0 degrees C is 32 degrees F',
                               '24 degrees C is 75.2 degrees F',
-                              '100 degrees C is 37.8 degrees F']
+                              '100 degrees C is 37.8 degrees F',
+                              '100 degrees C is 37.8 degrees F'
+                              ]'''
+
+        self.all_calc_list = []
 
         # Converter Main Screen GUI
         self.converter_frame = Frame(width=300, height=300, bg=background_color,
@@ -34,6 +40,9 @@ class Converter:
                                      padx=10, pady=10,
                                      command=lambda: self.history(self.all_calc_list))
         self.history_button.grid(row=1)
+
+        if len(self.all_calc_list) == 0:
+            self.history_button.config(state=DISABLED)
 
     def history(self, calc_history):
         History(self, calc_history)
