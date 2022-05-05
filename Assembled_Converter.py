@@ -76,7 +76,7 @@ class Converter:
             self.history_button.config(state=DISABLED)
 
         self.help_button = Button(self.hist_help_frame, font="Arial 12 bold",
-                                  text="Help", width=5)
+                                  text="Help", width=5, command=self.help)
         self.help_button.grid(row=0, column=1)
 
     def temp_convert(self, low):
@@ -103,7 +103,7 @@ class Converter:
                 centigrade = (to_convert - 32) * 5/9
                 to_convert = self.round_it(to_convert)
                 centigrade = self.round_it(centigrade)
-                answer = "{} degrees C is {} degrees F".format(to_convert, centigrade)
+                answer = "{} degrees F is {} degrees C".format(to_convert, centigrade)
 
             else:
                 # Input is invalid (too cold)
@@ -121,7 +121,6 @@ class Converter:
             # Add Answer to list for History
             if has_errors != "yes":
                 self.all_calc_list.append(answer)
-                print(self.all_calc_list)
                 self.history_button.config(state=NORMAL)
 
         except ValueError:
@@ -139,6 +138,17 @@ class Converter:
     def history(self, calc_history):
         History(self, calc_history)
 
+    def help(self):
+        get_help = Help(self)
+        get_help.help_text.configure(text="Please enter a number in the box "
+                                          "and then push one of the buttons "
+                                          "to convert the number to either "
+                                          "degrees C or degrees F.\n\n"
+                                          "The Calculation History area shows "
+                                          "up to seven past calculations "
+                                          "(most recent at the top). \n\n You can "
+                                          "also export your full calculation "
+                                          "history to a text file if desired.")
 
 class History:
     def __init__(self, partner, calc_history):
@@ -207,19 +217,185 @@ class History:
 
         # Export Button
         self.export_button = Button(self.export_dismiss_frame, text="Export",
-                                    font="Arial 12 bold")
+                                    font="Arial 12 bold",
+                                    command=lambda: self.export(calc_history))
         self.export_button.grid(row=0, column=0)
 
         # Dismiss Button
         self.dismiss_button = Button(self.export_dismiss_frame, text="Dismiss",
-                                     font="Arial 12 bold", command=partial(self.close_history, partner))
+                                     font="Arial 12 bold",
+                                     command=partial(self.close_history, partner))
         self.dismiss_button.grid(row=0, column=1)
-
 
     def close_history(self, partner):
         # Put history button back to normal
         partner.history_button.config(state=NORMAL)
         self.history_box.destroy()
+
+    def export(self, calc_history):
+        Export(self, calc_history)
+
+
+class Export:
+    def __init__(self, partner, calc_history):
+
+        print(calc_history)
+
+        background = "#a9ef99"  # Pale green
+
+        # disable export button
+        partner.export_button.config(state=DISABLED)
+
+        # Sets up child window (ie: export box)
+        self.export_box = Toplevel()
+
+        # If users press cross at top, closes export and 'releases' export button
+        self.export_box.protocol('WM_DELETE_WINDOW', partial(self.close_export, partner))
+
+        # Set up GUI Frame
+        self.export_frame = Frame(self.export_box, width=300, bg=background)
+        self.export_frame.grid()
+
+        # Set up Export heading (row 0)
+        self.how_heading = Label(self.export_frame, text="Export / Instructions",
+                                 font="arial 14 bold", bg=background)
+        self.how_heading.grid(row=0)
+
+        # Export Instructions (label, row 1)
+        self.export_text = Label(self.export_frame, text="Enter a filename in the "
+                                                         "box below and press the "
+                                                         "Save button to save your "
+                                                         "calculation history to a "
+                                                         "text file.",
+                                 justify=LEFT, width=40, bg=background, wrap=250)
+        self.export_text.grid(row=1)
+
+        # Warning text (label, row 2)
+        self.export_text = Label(self.export_frame, text="If the filename you "
+                                                         "enter below already "
+                                                         "exists, its contents "
+                                                         "will be replaced with "
+                                                         "your calculation history",
+                                 justify=LEFT, bg="#ffafaf", fg="maroon",
+                                 font="Arial 10 italic", wrap=225, padx=10, pady=10)
+        self.export_text.grid(row=2, pady=10)
+
+        # Filename Entry Box (row 3)
+        self.filename_entry = Entry(self.export_frame, width=20,
+                                    font="Arial 14 bold", justify=CENTER)
+        self.filename_entry.grid(row=3, pady=10)
+
+        # Error Message Labels (initially blank, row 4)
+        self.save_error_label = Label(self.export_frame, text="", fg="maroon",
+                                      bg=background)
+        self.save_error_label.grid(row=4)
+
+        # Save / Cancel Frame (row 5)
+        self.save_cancel_frame = Frame(self.export_frame)
+        self.save_cancel_frame.grid(row=5, pady=10)
+
+        # Save and Cancel Buttons (row 0 of save_cancel_frame)
+        self.save_button = Button(self.save_cancel_frame, text="Save",
+                                  command=partial(lambda: self.save_history(partner)))
+        self.save_button.grid(row=0, column=0)
+
+        self.cancel_button = Button(self.save_cancel_frame, text="Cancel",
+                                    command=partial(self.close_export, partner))
+        self.cancel_button.grid(row=0, column=1)
+
+    def save_history(self, partner, calc_history):
+
+        # Regular expression to check filename is valid
+        valid_char = "[A-Za-z0-9_]"
+        has_error = "no"
+
+        filename = self.filename_entry.get()
+        print(filename)
+
+        for letter in filename:
+            if re.match(valid_char, letter):
+                continue
+
+            elif letter == " ":
+                problem = "(no spaces allowed)"
+
+            else:
+                problem = ("(no {}'s allowed)".format(letter))
+            has_error = "yes"
+            break
+
+        if filename == "":
+            problem = "can't be blank"
+            has_error = "yes"
+
+        if has_error == "yes":
+            # Display error message
+            self.save_error_label.config(text="Invalid filename - {}".format())
+            # Change entry box background to pink
+            self.filename_entry.config(bg="#ffafaf")
+            print()
+
+        else:
+            # If there are no errors, generate text file and then close dialogue
+            # add .txt suffix!
+            filename = filename + ".txt"
+
+            # Create files to hold data
+            f = open(filename, "w+")
+
+            # add new line at end of each item
+            for item in calc_history:
+                f.write(item + "\n")
+
+            # close file
+            f.close()
+
+            # close dialogue
+            self.close_export(partner)
+
+    def close_export(self, partner):
+        # Put export button back to normal
+        partner.export_button.config(state=NORMAL)
+        self.export_box.destroy()
+
+class Help:
+    def __init__(self, partner):
+
+        background = "orange"
+
+        # disable help button
+        partner.help_button.config(state=DISABLED)
+
+        # Sets up child window (ie: help box)
+        self.help_box = Toplevel()
+
+        # If users press cross at top, closes help and 'releases' help button
+        self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
+
+        # Set up GUI Frame
+        self.help_frame = Frame(self.help_box, bg=background)
+        self.help_frame.grid()
+
+        # Set up Help heading (row 0)
+        self.how_heading = Label(self.help_frame, text="Help / Instructions",
+                                 font="arial 14 bold", bg=background)
+        self.how_heading.grid(row=0)
+
+        # Help text (label, row 1)
+        self.help_text = Label(self.help_frame, text = "",
+                               justify=LEFT, width=40, bg=background, wrap=250)
+        self.help_text.grid(column=0, row=1)
+
+        # Dismiss button (row 2)
+        self.dismiss_btn = Button(self.help_frame, text="Dismiss",
+                                  width=10, bg="orange", font="arial 10 bold",
+                                  command=partial(self.close_help, partner))
+        self.dismiss_btn.grid(row=2, pady=10)
+
+    def close_help(self, partner):
+        # Put help button back to normal
+        partner.help_button.config(state=NORMAL)
+        self.help_box.destroy()
 
 # main routine
 if __name__ == "__main__":

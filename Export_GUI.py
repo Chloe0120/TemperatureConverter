@@ -1,5 +1,6 @@
 from tkinter import *
 from functools import partial   # To prevent unwanted windows
+import re
 
 import random
 
@@ -10,77 +11,105 @@ class Converter:
         # Formatting variables
         background_color = "light blue"
 
-        # In actual program this is blank and is populated with user calculations
-        self.all_calc_list = ['0 degrees C is -17.8 degrees F',
-                              '0 degrees C is 32 degrees F',
-                              '40 degrees C is 104 degrees F',
-                              '40 degrees C is 4.4 degrees F',
-                              '12 degrees C is 53.6 degrees F',
-                              '24 degrees C is 75.2 degrees F',
-                              '100 degrees C is 37.8 degrees F']
-
         # Converter Main Screen GUI
-        self.converter_frame = Frame(width=300, height=300, bg=background_color,
+        self.converter_frame = Frame(width=300, height=300,
+                                     bg=background_color,
                                      pady=10)
         self.converter_frame.grid()
 
         # Temperature Conversion Heading (row 0)
-        self.temp_converter_label = Label(self.converter_frame, text="Temperature Converter",
+        self.temp_converter_label = Label(self.converter_frame,
+                                          text="Temperature Converter",
                                           font=("Arial", "16", "bold"),
                                           bg=background_color,
                                           padx=10, pady=10)
         self.temp_converter_label.grid(row=0)
 
-        # Help Button (row 1)
-        self.help_button = Button(self.converter_frame, text="help",
+        # Export Button (row 1)
+        self.export_button = Button(self.converter_frame, text="Export",
                                   font=("Arial", "14"),
-                                  padx=10, pady=10, command=self.help)
-        self.help_button.grid(row=1)
+                                  padx=10, pady=10, command=self.export)
+        self.export_button.grid(row=1)
 
-    def help(self):
-        print("You asked for help")
-        get_help = Help(self)
-        get_help.help_text.configure(text="Help text goes here")
+    def export(self):
+        get_export = Export(self)
 
 
-class Help:
+
+class Export:
     def __init__(self, partner):
 
-        background = "orange"
+        background = "#a9ef99"  # Pale green
 
-        # disable help button
-        partner.help_button.config(state=DISABLED)
+        # disable export button
+        partner.export_button.config(state=DISABLED)
 
-        # Sets up child window (ie: help box)
-        self.help_box = Toplevel()
+        # Sets up child window (ie: export box)
+        self.export_box = Toplevel()
 
-        # If users press cross at top, closes help and 'releases' help button
-        self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
+        # If users press cross at top, closes export and 'releases' export button
+        # 'releases' export button
+        self.export_box.protocol('WM_DELETE_WINDOW',
+                                 partial(self.close_export, partner))
+
 
         # Set up GUI Frame
-        self.help_frame = Frame(self.help_box, bg=background)
-        self.help_frame.grid()
+        self.export_frame = Frame(self.export_box, width=300, bg=background)
+        self.export_frame.grid()
 
-        # Set up Help heading (row 0)
-        self.how_heading = Label(self.help_frame, text="Help / Instructions",
+        # Set up Export heading (row 0)
+        self.how_heading = Label(self.export_frame,
+                                 text="Export / Instructions",
                                  font="arial 14 bold", bg=background)
         self.how_heading.grid(row=0)
 
-        # Help text (label, row 1)
-        self.help_text = Label(self.help_frame, text = "",
-                               justify=LEFT, width=40, bg=background, wrap=250)
-        self.help_text.grid(column=0, row=1)
+        # Export Instructions (label, row 1)
+        self.export_text = Label(self.export_frame, text="Enter a filename "
+                                                         "in the box below "
+                                                         "and press the Save "
+                                                         "button to save your "
+                                                         "calculation history "
+                                                         "to a text file.",
+                                 justify=LEFT, width=40,
+                                 bg=background, wrap=250)
+        self.export_text.grid(column=0, row=1)
 
-        # Dismiss button (row 2)
-        self.dismiss_btn = Button(self.help_frame, text="Dismiss",
-                                  width=10, bg="orange", font="arial 10 bold",
-                                  command=partial(self.close_help, partner))
-        self.dismiss_btn.grid(row=2, pady=10)
+        # Warning text (label, row 2)
+        self.export_text = Label(self.export_frame, text="If the filename "
+                                                          "you enter below "
+                                                          "already exists, "
+                                                          "its contents will "
+                                                          "be replaced with "
+                                                          "your calculation "
+                                                          "history",
+                                 justify=LEFT, bg="#ffafaf", fg="maroon",
+                                 font="Arial 10 italic", wrap=225, padx=10,
+                                 pady=10)
+        self.export_text.grid(row=2, pady=10)
 
-    def close_help(self, partner):
-        # Put help button back to normal
-        partner.help_button.config(state=NORMAL)
-        self.help_box.destroy()
+        # Filename Entry Box (row 3)
+        self.filename_entry = Entry(self.export_frame, width=20,
+                                    font="Arial 14 bold", justify=CENTER)
+        self.filename_entry.grid(row=3, pady=10)
+
+        # Save / Cancel Frame (row 4)
+        self.save_cancel_frame = Frame(self.export_frame)
+        self.save_cancel_frame.grid(row=5, pady=10)
+
+        # Save and Cancel Buttons (row 0 of save_cancel_frame)
+        self.save_button = Button(self.save_cancel_frame, text="Save")
+        self.save_button.grid(row=0, column=0)
+
+        self.cancel_button = Button(self.save_cancel_frame, text="Cancel",
+                                    command=partial(self.close_export, partner))
+        self.cancel_button.grid(row=0, column=1)
+
+
+    def close_export(self, partner):
+        # Put export button back to normal
+        partner.export_button.config(state=NORMAL)
+        self.export_box.destroy()
+
 
 # main routine
 if __name__ == "__main__":

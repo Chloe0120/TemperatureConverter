@@ -1,6 +1,6 @@
 from tkinter import *
 from functools import partial   # To prevent unwanted windows
-
+import re
 
 import random
 
@@ -89,7 +89,7 @@ class History:
         # Generate string from list of calculations
         history_string = ""
 
-        if len(calc_history) >= 7:
+        if len(calc_history) > 7:
             for item in range(0, 7):
                 history_string += calc_history[len(calc_history)
                                                - item - 1] + "\n"
