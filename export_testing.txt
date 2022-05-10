@@ -1,0 +1,7 @@
+10.5 degrees C is 50.9 degrees F
+-33.9 degrees C is -29.0 degrees F
+-273 degrees C is -459.4 degrees F
+0 degrees F is -17.8 degrees C
+50.9 degrees F is 10.5 degrees C
+-29 degrees F is -33.9 degrees C
+-459 degrees F is -272.8 degrees C

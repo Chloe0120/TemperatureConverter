@@ -1,5 +1,6 @@
 from tkinter import *
 from functools import partial   # To prevent unwanted windows
+import re
 
 import random
 
@@ -146,7 +147,7 @@ class Converter:
                                           "degrees C or degrees F.\n\n"
                                           "The Calculation History area shows "
                                           "up to seven past calculations "
-                                          "(most recent at the top). \n\n You can "
+                                          "(most recent at the top). \n\nYou can "
                                           "also export your full calculation "
                                           "history to a text file if desired.")
 
@@ -296,7 +297,7 @@ class Export:
 
         # Save and Cancel Buttons (row 0 of save_cancel_frame)
         self.save_button = Button(self.save_cancel_frame, text="Save",
-                                  command=partial(lambda: self.save_history(partner)))
+                                  command=partial(lambda: self.save_history(partner, calc_history)))
         self.save_button.grid(row=0, column=0)
 
         self.cancel_button = Button(self.save_cancel_frame, text="Cancel",
@@ -403,3 +404,4 @@ if __name__ == "__main__":
     root.title("Temperature Converter")
     something = Converter()
     root.mainloop()
+
